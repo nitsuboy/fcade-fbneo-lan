@@ -1,15 +1,37 @@
 #ifndef APP_H
 #define APP_H
 
-#include "raylib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN
+    #define NOGDI              // elimina Rectangle() do wingdi.h
+    #define NOMINMAX           // elimina min/max macros
+
+    // Renomeia declarações do Windows que conflitam com raylib
+    #define CloseWindow __win32_CloseWindow
+    #define ShowCursor __win32_ShowCursor
+
     #include <windows.h>
     #include <shlobj.h>
+
+    // Desfaz macros do Windows que atrapalham raylib
+    #ifdef DrawText
+    #undef DrawText            // DrawText → DrawTextA
+    #endif
+    #ifdef DrawTextEx
+    #undef DrawTextEx            // DrawText → DrawTextA
+    #endif
+    #ifdef LoadImage
+    #undef LoadImage           // LoadImage → LoadImageA
+    #endif
+
+    // Restaura nomes originais (não usamos CloseWindow/ShowCursor diretamente)
+    #undef CloseWindow
+    #undef ShowCursor
+
     typedef HANDLE ProcHandle;
     #define INVALID_PROC NULL
     #define SEP "\\"
@@ -23,6 +45,8 @@
     #define SEP "/"
     #define LAUNCHER "wine"
 #endif
+
+#include "raylib.h"
 
 #define WIDTH       660
 #define HEIGHT      580
@@ -71,6 +95,7 @@ typedef struct {
     ProcHandle launch_handle;
     char       status[128];
     char       roms[MAX_ROMS][64];
+    char       rom_list[4096];
     int        rom_count;
     int        dirty;
     double     save_timer;

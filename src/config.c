@@ -156,7 +156,11 @@ const char *fc_dir(App *app)
 
 void roms_dir(App *app, char *buf, int sz)
 {
-    snprintf(buf, sz, "%s" SEP "ROMs" SEP "FBNeo ROMs" SEP, fc_dir(app));
+    #ifdef _WIN32
+        snprintf(buf, sz, "%s" SEP "emulator" SEP "fbneo" SEP "ROMs" SEP, fc_dir(app));
+    #else
+        snprintf(buf, sz, "%s" SEP "ROMs" SEP "FBNeo ROMs" SEP, fc_dir(app));
+    #endif
 }
 
 void emu_path(App *app, char *buf, int sz)

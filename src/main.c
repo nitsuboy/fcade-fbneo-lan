@@ -58,7 +58,6 @@ static void field_init(
 int main(void)
 {
     App app = {0};
-    char rom_list[4096] = {0};
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(WIDTH, HEIGHT, "FBNeo LAN Launcher");
@@ -67,7 +66,6 @@ int main(void)
     GuiLoadStyleDefault();
     scan_roms(&app);
 
-    TraceLog(LOG_INFO, "%s", app.fields[FIELD_DIR].buf);
     field_init(&app.fields[FIELD_DIR], FIELD_DIR, "Fightcade Dir", app.fields[FIELD_DIR].buf,
                0, 0, 1);
     field_init(&app.fields[FIELD_ROM], FIELD_ROM, "ROM", "",
@@ -81,15 +79,6 @@ int main(void)
 
     app.editing_field = -1;
     app.selected_rom = -1;
-
-    int off = 0;
-    for (int i = 0; i < app.rom_count && off < (int)sizeof(rom_list) - 2; i++)
-    {
-        int n = snprintf(rom_list + off, sizeof(rom_list) - off,
-                         "%s;", app.roms[i]);
-        if (n > 0)
-            off += n;
-    }
 
     for (int i = 0; i < app.rom_count; i++)
         if (strcmp(app.fields[FIELD_ROM].buf, app.roms[i]) == 0)
@@ -179,9 +168,11 @@ int main(void)
         Rectangle btn_rec = {w / 2 - 100, by, 200, 34};
         if (GuiButton(btn_rec, "LAUNCH GAME") && app.launch_handle == INVALID_PROC)
         {
+            TraceLog(LOG_INFO, "ip ? %d", app.fields[FIELD_IP].buf);
             launch_emulator(&app);
         }
-        GuiLoadStyleDefault();
+
+        GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
 
         /* output box */
         int oy = by + 48;
@@ -261,7 +252,7 @@ int main(void)
         if (app.editing_field == FIELD_ROM)
             GuiUnlock();
 
-        if (GuiDropdownBox(app.fields[FIELD_ROM].rect, rom_list,
+        if (GuiDropdownBox(app.fields[FIELD_ROM].rect, app.rom_list,
                            &app.selected_rom, rom_edit))
         {
             if (rom_edit && app.selected_rom >= 0)

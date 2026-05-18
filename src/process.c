@@ -1,12 +1,13 @@
 #include "process.h"
 #include "config.h"
 
-void build_cmd(App *app, int side, int wink, char *out, int out_sz) {
-    const char *rom  = app->fields[FIELD_ROM].buf;
+void build_cmd(App *app, int side, int wink, char *out, int out_sz)
+{
+    const char *rom = app->fields[FIELD_ROM].buf;
     const char *port = app->fields[FIELD_PORT].buf;
-    const char *ip   = app->fields[FIELD_IP].buf;
+    const char *ip = app->fields[FIELD_IP].buf;
     const char *pport = app->fields[FIELD_PEER_PORT].buf;
-    const char *win  = wink ? "-w" : "";
+    const char *win = wink ? "-w" : "";
     char ep[512];
     emu_path(app, ep, sizeof(ep));
 #ifdef _WIN32
@@ -18,7 +19,8 @@ void build_cmd(App *app, int side, int wink, char *out, int out_sz) {
 #endif
 }
 
-void launch_emulator(App *app) {
+void launch_emulator(App *app)
+{
     char cmd[1024];
     int side = app->player + 1;
     build_cmd(app, side, app->windowed, cmd, sizeof(cmd));
@@ -27,11 +29,12 @@ void launch_emulator(App *app) {
     app->launch_handle = INVALID_PROC;
 
 #ifdef _WIN32
-    STARTUPINFO si = { sizeof(si) };
+    STARTUPINFO si = {sizeof(si)};
     PROCESS_INFORMATION pi;
     si.dwFlags = STARTF_USESHOWWINDOW;
     si.wShowWindow = SW_SHOW;
-    if (CreateProcess(NULL, cmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+    if (CreateProcess(NULL, cmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
+    {
         CloseHandle(pi.hThread);
         app->launch_handle = pi.hProcess;
         int l = strlen(app->output);
@@ -40,16 +43,21 @@ void launch_emulator(App *app) {
         app->output_len = strlen(app->output);
         snprintf(app->status, sizeof(app->status),
                  "Running (PID: %lu)", pi.dwProcessId);
-    } else {
+    }
+    else
+    {
         snprintf(app->status, sizeof(app->status),
                  "CreateProcess failed (error %lu)", GetLastError());
     }
 #else
     pid_t pid = fork();
-    if (pid == 0) {
+    if (pid == 0)
+    {
         execl("/bin/sh", "sh", "-c", cmd, (char *)NULL);
         _exit(1);
-    } else if (pid > 0) {
+    }
+    else if (pid > 0)
+    {
         app->launch_handle = pid;
         int l = strlen(app->output);
         snprintf(app->output + l, MAX_OUTPUT - l,
@@ -57,18 +65,24 @@ void launch_emulator(App *app) {
         app->output_len = strlen(app->output);
         snprintf(app->status, sizeof(app->status),
                  "Running (PID: %d)", pid);
-    } else {
+    }
+    else
+    {
         snprintf(app->status, sizeof(app->status), "fork() failed!");
     }
 #endif
 }
 
-void check_child(App *app) {
-    if (app->launch_handle == INVALID_PROC) return;
+void check_child(App *app)
+{
+    if (app->launch_handle == INVALID_PROC)
+        return;
 #ifdef _WIN32
     DWORD code;
-    if (!GetExitCodeProcess(app->launch_handle, &code)) return;
-    if (code == STILL_ACTIVE) return;
+    if (!GetExitCodeProcess(app->launch_handle, &code))
+        return;
+    if (code == STILL_ACTIVE)
+        return;
     CloseHandle(app->launch_handle);
     int len = strlen(app->output);
     snprintf(app->output + len, MAX_OUTPUT - len,
@@ -80,14 +94,18 @@ void check_child(App *app) {
 #else
     int wstatus;
     pid_t ret = waitpid(app->launch_handle, &wstatus, WNOHANG);
-    if (ret != app->launch_handle) return;
+    if (ret != app->launch_handle)
+        return;
     int len = strlen(app->output);
-    if (WIFEXITED(wstatus)) {
+    if (WIFEXITED(wstatus))
+    {
         snprintf(app->output + len, MAX_OUTPUT - len,
                  "Exited with code %d\n", WEXITSTATUS(wstatus));
         snprintf(app->status, sizeof(app->status),
                  "Exited (code %d)", WEXITSTATUS(wstatus));
-    } else if (WIFSIGNALED(wstatus)) {
+    }
+    else if (WIFSIGNALED(wstatus))
+    {
         snprintf(app->output + len, MAX_OUTPUT - len,
                  "Killed by signal %d\n", WTERMSIG(wstatus));
         snprintf(app->status, sizeof(app->status),
