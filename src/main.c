@@ -168,7 +168,6 @@ int main(void)
         Rectangle btn_rec = {w / 2 - 100, by, 200, 34};
         if (GuiButton(btn_rec, "LAUNCH GAME") && app.launch_handle == INVALID_PROC)
         {
-            TraceLog(LOG_INFO, "ip ? %d", app.fields[FIELD_IP].buf);
             launch_emulator(&app);
         }
 

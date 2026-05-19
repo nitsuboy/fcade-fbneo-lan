@@ -22,7 +22,7 @@ void build_cmd(App *app, int side, int wink, char *out, int out_sz)
 void launch_emulator(App *app)
 {
     char cmd[1024];
-    int side = app->player + 1;
+    int side = app->player;
     build_cmd(app, side, app->windowed, cmd, sizeof(cmd));
 
     app->output_len = snprintf(app->output, MAX_OUTPUT, "$ %s\n", cmd);
