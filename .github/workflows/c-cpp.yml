@@ -15,10 +15,10 @@ jobs:
           - uses: actions/checkout@v4
           - name: Download w64devkit
             run: |
-              curl -L https://github.com/skeeto/w64devkit/releases/download/v2.0.1/w64devkit-2.0.1.zip -o w64devkit.zip
+              curl -L https://github.com/raysan5/raylib/releases/download/6.0/raylib-6.0_win64_msvc16.zip -o w64devkit.zip
               7z x w64devkit.zip -oC:\raylib
           - name: Add to PATH
-            run: echo "C:\raylib\w64devkit\bin" >> $env:GITHUB_PATH
+            run: echo "C:\raylib\include" >> $env:GITHUB_PATH
           - name: Build
             run: make
           - uses: actions/upload-artifact@v4
@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependecies
-        run: sudo add-apt-repository ppa:texus/raylib && sudo apt update && sudo apt install libraylib5-dev libraylib-dev libgl-dev libx11-dev 
+        run: sudo add-apt-repository ppa:texus/raylib && sudo apt update && sudo apt install libraylib5-dev libgl-dev libx11-dev 
       - name: Build
         run: make
       - name: Upload artifact
