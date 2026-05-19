@@ -22,6 +22,7 @@ void build_cmd(App *app, int side, int wink, char *out, int out_sz)
 #ifdef _WIN32
     snprintf(out, out_sz, "\"%s\" quark:direct,%s,%s,%s,%s,%d,0 %s",
              ep, rom, port, ip, pport, side, win);
+    TraceLog(LOG_INFO,out);
 #else
     snprintf(out, out_sz, "%s \"%s\" quark:direct,%s,%s,%s,%s,%d,0 %s",
              LAUNCHER, ep, rom, port, ip, pport, side, win);
