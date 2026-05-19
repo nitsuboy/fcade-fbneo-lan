@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install raylib
-        run: sudo apt install -y libraylib-dev
+        run: sudo add-apt-repository ppa:texus/raylib && sudo apt update && sudo apt install libraylib5-dev
       - name: Build
         run: make
       - name: Upload artifact
