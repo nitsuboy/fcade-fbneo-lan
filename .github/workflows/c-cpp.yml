@@ -1,0 +1,43 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  release:
+    types: [ published ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+          - uses: actions/checkout@v4
+          - name: Download raylib
+            shell: cmd
+            run: |
+              curl -L https://github.com/raysan5/raylib/releases/download/6.0/raylib-6.0_win64_mingw-w64.zip -o raylib.zip
+              7z x raylib.zip -o"%USERPROFILE%\raylib"
+          - name: Build
+            shell: cmd
+            run: |
+              set "RAYLIB_DIR=%USERPROFILE%\raylib\raylib-6.0_win64_mingw-w64"
+              make CFLAGS="-Iinclude -I%RAYLIB_DIR%\include -O2 -Wall -Wextra -std=c99" LDFLAGS="-L%RAYLIB_DIR%\lib -lraylib -lopengl32 -lgdi32 -lwinmm -lshell32 -lole32"
+          - uses: actions/upload-artifact@v4
+            with:
+              name: fclauncher-windows
+              path: bin/fclauncher.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependecies
+        run: sudo add-apt-repository ppa:texus/raylib && sudo apt update && sudo apt install libraylib6-dev libgl-dev libx11-dev 
+      - name: Build
+        run: make
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fclauncher-linux
+          path: bin/fclauncher

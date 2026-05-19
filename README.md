@@ -26,7 +26,7 @@ Output binary: `bin/fclauncher` (Linux) or `bin/fclauncher.exe` (Windows).
 
 ## Usage
 
-![program screenshot](image.png)
+![program screenshot](image-1.png)
 
 1. Set the Fightcade directory (**Browse** button)
 2. Select a ROM
