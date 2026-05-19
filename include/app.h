@@ -66,9 +66,7 @@
 typedef enum {
     FIELD_DIR,
     FIELD_ROM,
-    FIELD_PORT,
     FIELD_IP,
-    FIELD_PEER_PORT,
     FIELD_COUNT
 } FieldId;
 
