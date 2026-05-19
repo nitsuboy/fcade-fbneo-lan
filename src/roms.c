@@ -7,9 +7,8 @@ void scan_roms(App *app)
     roms_dir(app, dir, sizeof(dir));
 #ifdef _WIN32
     WIN32_FIND_DATA fd;
-    char pattern[512];
+    char pattern[1024];
     snprintf(pattern, sizeof(pattern), "%s*.zip", dir);
-    TraceLog(LOG_INFO, "%s", pattern);
     HANDLE h = FindFirstFileA(pattern, &fd);
 
     if (h == INVALID_HANDLE_VALUE)

@@ -99,20 +99,10 @@ void ini_load(App *app)
             if (ini_val(line, v, sizeof(v)))
                 strncpy(app->fields[FIELD_ROM].buf, v, MAX_FIELD);
         }
-        else if (ini_match(line, "my_port"))
-        {
-            if (ini_val(line, v, sizeof(v)))
-                strncpy(app->fields[FIELD_PORT].buf, v, MAX_FIELD);
-        }
         else if (ini_match(line, "peer_ip"))
         {
             if (ini_val(line, v, sizeof(v)))
                 strncpy(app->fields[FIELD_IP].buf, v, MAX_FIELD);
-        }
-        else if (ini_match(line, "peer_port"))
-        {
-            if (ini_val(line, v, sizeof(v)))
-                strncpy(app->fields[FIELD_PEER_PORT].buf, v, MAX_FIELD);
         }
         else if (ini_match(line, "player"))
         {
@@ -138,9 +128,7 @@ void ini_save(App *app)
     fprintf(f, "# FBNeo LAN Launcher config\n\n");
     fprintf(f, "fightcade_dir = %s\n", app->fields[FIELD_DIR].buf);
     fprintf(f, "rom = %s\n", app->fields[FIELD_ROM].buf);
-    fprintf(f, "my_port = %s\n", app->fields[FIELD_PORT].buf);
     fprintf(f, "peer_ip = %s\n", app->fields[FIELD_IP].buf);
-    fprintf(f, "peer_port = %s\n", app->fields[FIELD_PEER_PORT].buf);
     fprintf(f, "player = %d\n", app->player);
     fprintf(f, "windowed = %d\n", app->windowed);
     fclose(f);

@@ -70,12 +70,8 @@ int main(void)
                0, 0, 1);
     field_init(&app.fields[FIELD_ROM], FIELD_ROM, "ROM", "",
                0, 2, 1);
-    field_init(&app.fields[FIELD_PORT], FIELD_PORT, "My Port", app.fields[FIELD_PORT].buf,
-               0, 3, 1);
-    field_init(&app.fields[FIELD_PEER_PORT], FIELD_PEER_PORT, "Peer Port", app.fields[FIELD_PEER_PORT].buf,
-               0, 4, 1);
     field_init(&app.fields[FIELD_IP], FIELD_IP, "Peer IP", app.fields[FIELD_IP].buf,
-               0, 5, 1);
+               0, 3, 1);
 
     app.editing_field = -1;
     app.selected_rom = -1;
@@ -153,7 +149,7 @@ int main(void)
 
         /* radios */
         /* radio labels */
-        int rx = LX, ry = LY + LS * 6 + 4;
+        int rx = LX, ry = LY + LS * 4 + 4;
         GuiToggleGroup((Rectangle){rx, ry, w / 2 - 80, 22}, "P1;P2", &app.player);
         DrawText("Player", rx - MeasureText("Player", 14) - 8, ry, 14, COL_DIM);
         ry += 28;

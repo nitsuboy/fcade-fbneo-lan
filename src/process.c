@@ -4,15 +4,25 @@
 void build_cmd(App *app, int side, int wink, char *out, int out_sz)
 {
     const char *rom = app->fields[FIELD_ROM].buf;
-    const char *port = app->fields[FIELD_PORT].buf;
     const char *ip = app->fields[FIELD_IP].buf;
-    const char *pport = app->fields[FIELD_PEER_PORT].buf;
+    const char *port;
+    const char *pport;
+    if (side) {
+        port = "7000";
+        pport = "7001";
+    }
+    else {
+        port = "7001";
+        pport = "7000";
+    }
+
     const char *win = wink ? "-w" : "";
     char ep[512];
     emu_path(app, ep, sizeof(ep));
 #ifdef _WIN32
     snprintf(out, out_sz, "\"%s\" quark:direct,%s,%s,%s,%s,%d,0 %s",
              ep, rom, port, ip, pport, side, win);
+    TraceLog(LOG_INFO,out);
 #else
     snprintf(out, out_sz, "%s \"%s\" quark:direct,%s,%s,%s,%s,%d,0 %s",
              LAUNCHER, ep, rom, port, ip, pport, side, win);
