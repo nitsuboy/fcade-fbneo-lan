@@ -7,7 +7,6 @@ CC = gcc
 CFLAGS = -I$(INCDIR) -O2 -Wall -Wextra -std=c99
 
 ifeq ($(OS),Windows_NT)
-    CC = C:/raylib/w64devkit/bin/gcc.exe
     LDFLAGS = -lraylib -lopengl32 -lgdi32 -lwinmm -lshell32 -lole32 -mwindows
     TARGET = $(BINDIR)/fclauncher.exe
     MKDIR = mkdir

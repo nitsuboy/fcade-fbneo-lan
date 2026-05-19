@@ -25,8 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install raylib
-        run: sudo add-apt-repository ppa:texus/raylib && sudo apt update && sudo apt install libraylib5-dev
+      - name: Install dependecies
+        run: sudo add-apt-repository ppa:texus/raylib && sudo apt update && sudo apt install libraylib5-dev && sudo apt install -y libraylib-dev libgl-dev libx11-dev 
       - name: Build
         run: make
       - name: Upload artifact
