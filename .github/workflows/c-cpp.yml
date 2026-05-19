@@ -9,29 +9,33 @@ on:
     types: [ published ]
 
 jobs:
-  linux:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+          - uses: actions/checkout@v4
+          - name: Download w64devkit
+            run: |
+              curl -L https://github.com/skeeto/w64devkit/releases/download/v2.0.1/w64devkit-2.0.1.zip -o w64devkit.zip
+              7z x w64devkit.zip -oC:\raylib
+          - name: Add to PATH
+            run: echo "C:\raylib\w64devkit\bin" >> $env:GITHUB_PATH
+          - name: Build
+            run: make
+          - uses: actions/upload-artifact@v4
+            with:
+              name: fclauncher-windows
+              path: bin/fclauncher.exe
+
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt install -y libraylib-dev libgl-dev libx11-dev
-      - run: make
-      - uses: actions/upload-artifact@v4
+      - name: Install dependecies
+        run: sudo add-apt-repository ppa:texus/raylib && sudo apt update && sudo apt install libraylib5-dev libraylib-dev libgl-dev libx11-dev 
+      - name: Build
+        run: make
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: fclauncher-linux
           path: bin/fclauncher
-
-  windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-raylib
-      - shell: msys2 {0}
-        run: make
-      - uses: actions/upload-artifact@v4
-        with:
-          name: fclauncher-windows
-          path: bin/fclauncher.exe
