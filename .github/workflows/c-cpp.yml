@@ -14,13 +14,15 @@ jobs:
     steps:
           - uses: actions/checkout@v4
           - name: Download raylib
+            shell: powershell
             run: |
               curl -L https://github.com/raysan5/raylib/releases/download/6.0/raylib-6.0_win64_mingw-w64.zip -o raylib.zip
-              7z x raylib.zip -o$env:USERPROFILE\raylib
+              7z x raylib.zip -o"$env:USERPROFILE\raylib"
           - name: Build
+            shell: cmd
             run: |
-              make CFLAGS="-Iinclude -I$env:USERPROFILE\raylib\raylib-6.0_win64_mingw_w64\include -O2 -Wall -Wextra -std=c99" ^
-              LDFLAGS="-L$env:USERPROFILE\raylib\raylib-6.0_win64_mingw_w64\lib -lraylib -lopengl32 -lgdi32 -lwinmm -lshell32 -lole32"
+              set "RAYLIB_DIR=%USERPROFILE%\raylib\raylib-6.0_win64_mingw-w64"
+              make CFLAGS="-Iinclude -I%RAYLIB_DIR%\include -O2 -Wall -Wextra -std=c99" LDFLAGS="-L%RAYLIB_DIR%\lib -lraylib -lopengl32 -lgdi32 -lwinmm -lshell32 -lole32"
           - uses: actions/upload-artifact@v4
             with:
               name: fclauncher-windows

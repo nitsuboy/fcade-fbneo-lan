@@ -3,10 +3,10 @@ BUILDDIR = build
 SRCDIR = src
 INCDIR = include
 CC = gcc
-
-CFLAGS = -I$(INCDIR) -O2 -Wall -Wextra -std=c99
+CFLAGS = -I$(INCDIR) -O2 -Wall -Wextra -std=c99 -I%RAYLIB_DIR%\include
 
 ifeq ($(OS),Windows_NT)
+    
     LDFLAGS = -lraylib -lopengl32 -lgdi32 -lwinmm -lshell32 -lole32 -mwindows
     TARGET = $(BINDIR)/fclauncher.exe
     MKDIR = mkdir
