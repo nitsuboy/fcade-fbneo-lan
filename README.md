@@ -1,14 +1,14 @@
 # FBNeo LAN Launcher
 
-Launcher GUI para jogar FBNeo online via rede local (direct connect).
+GUI launcher for playing FBNeo online via local network (direct connect).
 
-## Dependências
+## Dependencies
 
-- [raylib](https://www.raylib.com/) (já incluso no w64devkit no Windows)
-- Compilador C99 (gcc, MinGW, etc.)
+- [raylib](https://www.raylib.com/) (included with w64devkit on Windows)
+- C99 compiler (gcc, MinGW, etc.)
 - `make`
 
-## Compilar
+## Build
 
 ### Windows (w64devkit)
 
@@ -22,27 +22,27 @@ make
 make
 ```
 
-Binário gerado em `bin/fclauncher` (Linux) ou `bin/fclauncher.exe` (Windows).
+Output binary: `bin/fclauncher` (Linux) or `bin/fclauncher.exe` (Windows).
 
-## Uso
+## Usage
 
 ![program screenshot](image.png)
 
-1. Configure o diretório do Fightcade (botão **Browse**)
-2. Selecione o ROM
-3. Configure porta e IP do peer
-4. Clique em **LAUNCH GAME**
+1. Set the Fightcade directory (**Browse** button)
+2. Select a ROM
+3. Configure the port and peer IP
+4. Click **LAUNCH GAME**
 
-## Estrutura
+## Structure
 
 ```
-├── src/          # Código fonte (.c)
+├── src/          # Source code (.c)
 ├── include/      # Headers (.h)
-├── build/        # Objetos compilados
-├── bin/          # Binário final
+├── build/        # Compiled objects
+├── bin/          # Final binary
 └── Makefile      # Build system
 ```
 
-## Licença
+## License
 
 MIT
