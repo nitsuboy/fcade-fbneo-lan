@@ -13,14 +13,14 @@ jobs:
     runs-on: windows-latest
     steps:
           - uses: actions/checkout@v4
-          - name: Download w64devkit
+          - name: Download raylib
             run: |
-              curl -L https://github.com/raysan5/raylib/releases/download/6.0/raylib-6.0_win64_msvc16.zip -o w64devkit.zip
-              7z x w64devkit.zip -oC:\raylib
-          - name: Add to PATH
-            run: echo "C:\raylib\include" >> $env:GITHUB_PATH
+              curl -L https://github.com/raysan5/raylib/releases/download/6.0/raylib-6.0_win64_mingw_w64.zip -o raylib.zip
+              7z x raylib.zip -o$env:USERPROFILE\raylib
           - name: Build
-            run: make
+            run: |
+              make CFLAGS="-Iinclude -I$env:USERPROFILE\raylib\raylib-6.0_win64_mingw_w64\include -O2 -Wall -Wextra -std=c99" ^
+              LDFLAGS="-L$env:USERPROFILE\raylib\raylib-6.0_win64_mingw_w64\lib -lraylib -lopengl32 -lgdi32 -lwinmm -lshell32 -lole32"
           - uses: actions/upload-artifact@v4
             with:
               name: fclauncher-windows
@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependecies
-        run: sudo add-apt-repository ppa:texus/raylib && sudo apt update && sudo apt install libraylib5-dev libgl-dev libx11-dev 
+        run: sudo add-apt-repository ppa:texus/raylib && sudo apt update && sudo apt install libraylib6-dev libgl-dev libx11-dev 
       - name: Build
         run: make
       - name: Upload artifact
