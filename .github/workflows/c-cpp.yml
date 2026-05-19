@@ -14,10 +14,10 @@ jobs:
     steps:
           - uses: actions/checkout@v4
           - name: Download raylib
-            shell: powershell
-            run: |
+            shell: cmd
+            run:
               curl -L https://github.com/raysan5/raylib/releases/download/6.0/raylib-6.0_win64_mingw-w64.zip -o raylib.zip
-              7z x raylib.zip -o"$env:USERPROFILE\raylib"
+              7z x raylib.zip -o"%USERPROFILE%\raylib"
           - name: Build
             shell: cmd
             run: |
