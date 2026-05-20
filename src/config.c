@@ -78,31 +78,31 @@ void ini_load(App *app)
 {
     char path[512];
     ini_path(path, sizeof(path));
-    TraceLog(LOG_INFO, path);
+    TraceLog(LOG_DEBUG, path);
     FILE *f = fopen(path, "r");
     if (!f)
         return;
     char line[512];
     while (fgets(line, sizeof(line), f))
     {
-        TraceLog(LOG_INFO, line);
+        TraceLog(LOG_DEBUG, line);
         if (!ini_key(line))
             continue;
         char v[1024];
         if (ini_match(line, "fightcade_dir"))
         {
             if (ini_val(line, v, sizeof(v)))
-                strncpy(app->fields[FIELD_DIR].buf, v, MAX_FIELD);
+                snprintf(app->fields[FIELD_DIR].buf,MAX_FIELD,v);
         }
         else if (ini_match(line, "rom"))
         {
             if (ini_val(line, v, sizeof(v)))
-                strncpy(app->fields[FIELD_ROM].buf, v, MAX_FIELD);
+                snprintf(app->fields[FIELD_ROM].buf,MAX_FIELD,v);
         }
         else if (ini_match(line, "peer_ip"))
         {
             if (ini_val(line, v, sizeof(v)))
-                strncpy(app->fields[FIELD_IP].buf, v, MAX_FIELD);
+                snprintf(app->fields[FIELD_IP].buf,MAX_FIELD,v);
         }
         else if (ini_match(line, "player"))
         {

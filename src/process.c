@@ -39,7 +39,8 @@ void launch_emulator(App *app)
     app->launch_handle = INVALID_PROC;
 
 #ifdef _WIN32
-    STARTUPINFO si = {sizeof(si)};
+    STARTUPINFO si;
+    ZeroMemory(&si,sizeof(si));
     PROCESS_INFORMATION pi;
     si.dwFlags = STARTF_USESHOWWINDOW;
     si.wShowWindow = SW_SHOW;

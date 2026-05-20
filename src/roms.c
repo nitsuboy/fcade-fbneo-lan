@@ -13,8 +13,8 @@ void scan_roms(App *app)
 
     if (h == INVALID_HANDLE_VALUE)
     {
-        app->rom_count = 0; // garante estado limpo
-        TraceLog(LOG_INFO, "FindFirstFile failed (Error: %lu)\n", GetLastError());
+        app->rom_count = 0;
+        TraceLog(LOG_DEBUG, "FindFirstFile failed (Error: %lu)\n", GetLastError());
         return;
     }
     do
@@ -23,7 +23,6 @@ void scan_roms(App *app)
         if (len > 4)
         {
             char *ext = fd.cFileName + len - 4;
-            // case-insensitive no Windows
             if ((ext[0] == '.' || ext[0] == '.') &&
                 (ext[1] == 'z' || ext[1] == 'Z') &&
                 (ext[2] == 'i' || ext[2] == 'I') &&

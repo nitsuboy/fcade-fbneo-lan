@@ -53,7 +53,7 @@ static void field_init(
     f->pos = pos;
     f->line = line;
     f->columns = col;
-    strncpy(f->buf, def, MAX_FIELD - 1);
+    snprintf(f->buf,MAX_FIELD, def );
 }
 
 int main(void)
@@ -157,7 +157,7 @@ int main(void)
             app.editing_field = -1;
             if (browse_folder(path, sizeof(path)))
             {
-                strncpy(app.fields[FIELD_DIR].buf, path, MAX_FIELD - 1);
+                snprintf(app.fields[FIELD_DIR].buf,MAX_FIELD, path);
                 app.dirty = 1;
                 app.rom_count = 0;
                 scan_roms(&app);
