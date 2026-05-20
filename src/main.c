@@ -9,6 +9,7 @@
 #define LX 120
 #define LY 48
 #define LS 32
+#define IH 28
 
 #ifdef _WIN32
 static int browse_folder(char *out, int sz)
@@ -64,14 +65,20 @@ int main(void)
     SetTargetFPS(60);
     ini_load(&app);
     GuiLoadStyleDefault();
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
+    GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL, ColorToInt(COL_BG));
     scan_roms(&app);
 
     field_init(&app.fields[FIELD_DIR], FIELD_DIR, "Fightcade Dir", app.fields[FIELD_DIR].buf,
                0, 0, 1);
-    field_init(&app.fields[FIELD_ROM], FIELD_ROM, "ROM", "",
+    field_init(&app.fields[FIELD_ROM], FIELD_ROM, "ROM", app.fields[FIELD_ROM].buf,
                0, 2, 1);
     field_init(&app.fields[FIELD_IP], FIELD_IP, "Peer IP", app.fields[FIELD_IP].buf,
                0, 3, 1);
+    field_init(&app.fields[FIELD_PLAYER], FIELD_PLAYER, "Player", "",
+               0, 4, 2);
+    field_init(&app.fields[FIELD_WINDOWED], FIELD_WINDOWED, "Window", "",
+               0, 5, 2);
 
     app.editing_field = -1;
     app.selected_rom = -1;
@@ -82,34 +89,9 @@ int main(void)
 
     while (!WindowShouldClose())
     {
-        if (app.editing_field == FIELD_ROM)
-            GuiLock();
-
-        int w = GetScreenWidth();
-        int h = GetScreenHeight();
-
         check_child(&app);
+        bool rom_edit = (app.editing_field == FIELD_ROM);
 
-        /* --- text fields (raygui) --- */
-        float fw = w - 160; // largura dos campos
-        for (int i = 0; i < FIELD_COUNT; i++)
-        {
-            app.fields[i].rect = (Rectangle){
-                LX + ((fw) / app.fields[i].columns) * app.fields[i].pos,
-                LY + LS * app.fields[i].line,
-                ((fw) / app.fields[i].columns),
-                28};
-            if (i == FIELD_ROM)
-                continue;
-
-            if (GuiTextBox(app.fields[i].rect, app.fields[i].buf, MAX_FIELD, app.editing_field == i))
-            {
-                app.editing_field = (app.editing_field == i) ? -1 : i;
-                app.dirty = 1;
-            }
-        }
-
-        /* tab / enter navigation */
         if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_DOWN))
         {
             if (app.editing_field >= 0)
@@ -128,13 +110,48 @@ int main(void)
                 launch_emulator(&app);
         }
 
-        /* browse button */
-        Rectangle browse_btn = {
-            LX,
-            LY + LS * 1,
-            fw,
-            28};
-        if (GuiButton(browse_btn, "Browse"))
+        int w = GetScreenWidth();
+        int h = GetScreenHeight();
+
+        float fw = w - 160; // largura dos campos
+
+        BeginDrawing();
+        ClearBackground(COL_BG);
+
+        DrawText("FBNeo LAN Launcher", 14, 14, 22, COL_ACCENT);
+        DrawLine(0, 44, w, 44, COL_BORDER);
+
+        if (rom_edit)
+            GuiLock();
+
+        for (int i = 0; i < FIELD_COUNT; i++)
+        {
+            app.fields[i].rect = (Rectangle){
+                LX + ((fw) / app.fields[i].columns) * app.fields[i].pos,
+                LY + LS * app.fields[i].line,
+                ((fw) / app.fields[i].columns),
+                IH};
+
+            switch (i)
+            {
+            case FIELD_PLAYER:
+                GuiToggleGroup(app.fields[i].rect, "P1;P2", &app.player);
+                break;
+            case FIELD_WINDOWED:
+                GuiToggleGroup(app.fields[i].rect, "Fullscreen;Windowed", &app.windowed);
+                break;
+            case FIELD_ROM:
+                break;
+            default:
+                if (GuiTextBox(app.fields[i].rect, app.fields[i].buf, MAX_FIELD, app.editing_field == i))
+                {
+                    app.editing_field = (app.editing_field == i) ? -1 : i;
+                    app.dirty = 1;
+                }
+            }
+        }
+
+        if (GuiButton((Rectangle){LX, LY + LS * 1, fw, IH}, "Browse"))
         {
             char path[512];
             app.editing_field = -1;
@@ -147,29 +164,22 @@ int main(void)
             }
         }
 
-        /* radios */
-        /* radio labels */
-        int rx = LX, ry = LY + LS * 4 + 4;
-        GuiToggleGroup((Rectangle){rx, ry, w / 2 - 80, 22}, "P1;P2", &app.player);
-        DrawText("Player", rx - MeasureText("Player", 14) - 8, ry, 14, COL_DIM);
-        ry += 28;
-        GuiToggleGroup((Rectangle){rx, ry, w / 2 - 80, 22}, "Fullscreen;Windowed", &app.windowed);
-        DrawText("Window", rx - MeasureText("Window", 14) - 8, ry, 14, COL_DIM);
-
-        /* launch button */
-        int by = ry + 40;
+        int by = (LY + LS * 5) + 40;
         Color btn_col = app.launch_handle != INVALID_PROC ? COL_DIM : COL_ACCENT2;
         GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, ColorToInt(btn_col));
-        GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL, ColorToInt(COL_BG));
-        Rectangle btn_rec = {w / 2 - 100, by, 200, 34};
-        if (GuiButton(btn_rec, "LAUNCH GAME") && app.launch_handle == INVALID_PROC)
+
+        for (int i = 0; i < FIELD_COUNT; i++)
+        {
+            DrawText(app.fields[i].label,
+                     app.fields[i].rect.x - MeasureText(app.fields[i].label, 14) - 8,
+                     app.fields[i].rect.y + 6, 14, COL_DIM);
+        }
+
+        if (GuiButton((Rectangle){w / 2 - 100, by, 200, 34}, "LAUNCH GAME") && app.launch_handle == INVALID_PROC)
         {
             launch_emulator(&app);
         }
 
-        GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
-
-        /* output box */
         int oy = by + 48;
         Rectangle out_box = {10, oy, w - 20, h - oy - 30};
         int wheel = GetMouseWheelMove();
@@ -190,37 +200,6 @@ int main(void)
         if (app.output_scroll > max_scroll)
             app.output_scroll = max_scroll;
 
-        /* auto-save */
-        if (app.dirty)
-        {
-            app.save_timer += GetFrameTime();
-            if (app.save_timer > 1.0)
-            {
-                ini_save(&app);
-                app.dirty = 0;
-                app.save_timer = 0;
-            }
-        }
-
-        /* ── draw ── */
-        BeginDrawing();
-        ClearBackground(COL_BG);
-
-        GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ColorToInt(COL_BG));
-        DrawText("FBNeo LAN Launcher", 14, 14, 22, COL_ACCENT);
-        DrawLine(0, 44, w, 44, COL_BORDER);
-
-        /* field labels */
-        for (int i = 0; i < FIELD_COUNT; i++)
-        {
-            DrawText(app.fields[i].label,
-                     app.fields[i].rect.x - MeasureText(app.fields[i].label, 14) - 8,
-                     app.fields[i].rect.y + 6, 14, COL_DIM);
-        }
-
-        /* browse button text — drawn by GuiButton */
-
-        /* output */
         GuiGroupBox(out_box, NULL);
         BeginScissorMode(out_box.x, out_box.y, out_box.width, out_box.height);
         int ty = out_box.y + 4 - app.output_scroll;
@@ -242,9 +221,7 @@ int main(void)
 
         DrawText(app.status, 14, h - 22, 14, COL_DIM);
 
-        bool rom_edit = (app.editing_field == FIELD_ROM);
-
-        if (app.editing_field == FIELD_ROM)
+        if (rom_edit)
             GuiUnlock();
 
         if (GuiDropdownBox(app.fields[FIELD_ROM].rect, app.rom_list,
@@ -257,6 +234,17 @@ int main(void)
                 app.dirty = 1;
             }
             app.editing_field = rom_edit ? -1 : FIELD_ROM;
+        }
+
+        if (app.dirty)
+        {
+            app.save_timer += GetFrameTime();
+            if (app.save_timer > 1.0)
+            {
+                ini_save(&app);
+                app.dirty = 0;
+                app.save_timer = 0;
+            }
         }
 
         EndDrawing();
