@@ -53,7 +53,7 @@ static void field_init(
     f->pos = pos;
     f->line = line;
     f->columns = col;
-    snprintf(f->buf,MAX_FIELD, def );
+    snprintf(f->buf, MAX_FIELD, def);
 }
 
 int main(void)
@@ -64,6 +64,7 @@ int main(void)
     InitWindow(WIDTH, HEIGHT, "FBNeo LAN Launcher");
     SetTargetFPS(60);
     ini_load(&app);
+    discovery_start(&app.discovery);
     GuiLoadStyleDefault();
     GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
     GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL, ColorToInt(COL_BG));
@@ -107,6 +108,8 @@ int main(void)
             if (app.launch_handle == INVALID_PROC)
                 launch_emulator(&app);
         }
+        if (IsKeyPressed(KEY_ESCAPE))
+            app.show_peers = 0;
 
         int w = GetScreenWidth();
         int h = GetScreenHeight();
@@ -137,6 +140,15 @@ int main(void)
                 break;
             case FIELD_ROM:
                 break;
+            case FIELD_IP:
+                app.fields[i].rect.width -= 74;
+                Rectangle sbtn = {app.fields[i].rect.x + app.fields[i].rect.width + 4,
+                                  app.fields[i].rect.y, 70, app.fields[i].rect.height};
+                if (GuiButton(sbtn, "Scan"))
+                {
+                    app.show_peers = !app.show_peers;
+                    app.selected_peer = -1;
+                }
             default:
                 if (GuiTextBox(app.fields[i].rect, app.fields[i].buf, MAX_FIELD, app.editing_field == i))
                 {
@@ -152,14 +164,14 @@ int main(void)
             app.editing_field = -1;
             if (browse_folder(path, sizeof(path)))
             {
-                snprintf(app.fields[FIELD_DIR].buf,MAX_FIELD, path);
+                snprintf(app.fields[FIELD_DIR].buf, MAX_FIELD, path);
                 app.dirty = 1;
                 app.rom_count = 0;
                 scan_roms(&app);
             }
         }
 
-        int by = (LY + LS * 5) + 40;
+        int by = (LY + LS * 4) + 40;
         Color btn_col = app.launch_handle != INVALID_PROC ? COL_DIM : COL_ACCENT2;
         GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, ColorToInt(btn_col));
 
@@ -177,42 +189,92 @@ int main(void)
 
         int oy = by + 48;
         Rectangle out_box = {10, oy, w - 20, h - oy - 30};
-        int wheel = GetMouseWheelMove();
-        if (wheel)
+        if (!app.show_peers)
         {
-            app.output_scroll -= wheel * 16;
-            if (app.output_scroll < 0)
-                app.output_scroll = 0;
+            int wheel = GetMouseWheelMove();
+            if (wheel)
+            {
+                app.output_scroll -= wheel * 16;
+                if (app.output_scroll < 0)
+                    app.output_scroll = 0;
+            }
+            int line_h = 16;
+            int lines = 0;
+            for (int i = 0; i < app.output_len; i++)
+                if (app.output[i] == '\n')
+                    lines++;
+            int max_scroll = lines * line_h - (out_box.height - 8);
+            if (max_scroll < 0)
+                max_scroll = 0;
+            if (app.output_scroll > max_scroll)
+                app.output_scroll = max_scroll;
         }
-        int line_h = 16;
-        int lines = 0;
-        for (int i = 0; i < app.output_len; i++)
-            if (app.output[i] == '\n')
-                lines++;
-        int max_scroll = lines * line_h - (out_box.height - 8);
-        if (max_scroll < 0)
-            max_scroll = 0;
-        if (app.output_scroll > max_scroll)
-            app.output_scroll = max_scroll;
 
-        GuiGroupBox(out_box, NULL);
-        BeginScissorMode(out_box.x, out_box.y, out_box.width, out_box.height);
-        int ty = out_box.y + 4 - app.output_scroll;
-        int lpos = 0;
-        for (int i = 0; i < MAX_LINES && lpos < app.output_len; i++)
+        if (app.show_peers)
         {
-            int end = lpos;
-            while (end < app.output_len && app.output[end] != '\n')
-                end++;
-            char saved = app.output[end];
-            app.output[end] = 0;
-            Color tc = (app.output[lpos] == '$') ? COL_ACCENT2 : COL_DIM;
-            DrawText(app.output + lpos, out_box.x + 6, ty, 14, tc);
-            app.output[end] = saved;
-            lpos = end + 1;
-            ty += line_h;
+            GuiGroupBox(out_box, "Peers on LAN");
+            if (app.discovery.count == 0)
+            {
+                const char *msg = app.discovery.running ? "Scanning..." : "No peers found";
+                DrawText(msg, out_box.x + 6, out_box.y + 6, 14, COL_DIM);
+            }
+            else
+            {
+                int py = out_box.y + 4;
+                for (int i = 0; i < app.discovery.count; i++)
+                {
+                    char label[96];
+                    if (app.discovery.peers[i].hostname[0])
+                        snprintf(label, sizeof(label), "%s (%s)",
+                                 app.discovery.peers[i].hostname,
+                                 app.discovery.peers[i].ip);
+                    else
+                        snprintf(label, sizeof(label), "%s",
+                                 app.discovery.peers[i].ip);
+
+                    Rectangle item = {out_box.x + 4, py, out_box.width - 8, 22};
+                    Color ic = (i == app.selected_peer) ? COL_ACCENT : COL_PANEL;
+                    DrawRectangleRec(item, ic);
+                    DrawRectangleLinesEx(item, 1, COL_BORDER);
+                    DrawText(label, item.x + 4, item.y + 3, 14, COL_TEXT);
+
+                    Vector2 mp = GetMousePosition();
+                    if (CheckCollisionPointRec(mp, item) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                    {
+                        strncpy(app.fields[FIELD_IP].buf,
+                                app.discovery.peers[i].ip, MAX_FIELD - 1);
+                        app.dirty = 1;
+                        app.show_peers = 0;
+                    }
+                    py += 24;
+                    if (py > out_box.y + out_box.height - 8)
+                        break;
+                }
+            }
+            app.discovery.updated = 0;
         }
-        EndScissorMode();
+        else
+        {
+            GuiGroupBox(out_box, NULL);
+            BeginScissorMode(out_box.x, out_box.y, out_box.width, out_box.height);
+            int ty = out_box.y + 4 - app.output_scroll;
+            int lpos = 0;
+            int line_h = 16;
+            for (int i = 0; i < MAX_LINES && lpos < app.output_len; i++)
+            {
+                int end = lpos;
+                while (end < app.output_len && app.output[end] != '\n')
+                    end++;
+                char saved = app.output[end];
+                app.output[end] = 0;
+                Color tc = (app.output[lpos] == '$') ? COL_ACCENT2 : COL_DIM;
+                DrawText(app.output + lpos, out_box.x + 6, ty, 14, tc);
+                app.output[end] = saved;
+                lpos = end + 1;
+                ty += line_h;
+            }
+            EndScissorMode();
+        }
 
         DrawText(app.status, 14, h - 22, 14, COL_DIM);
 
@@ -246,6 +308,7 @@ int main(void)
     }
 
     ini_save(&app);
+    discovery_stop(&app.discovery);
     CloseWindow();
     return 0;
 }
