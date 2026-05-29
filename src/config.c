@@ -109,11 +109,6 @@ void ini_load(App *app)
             if (ini_val(line, v, sizeof(v)))
                 app->player = atoi(v);
         }
-        else if (ini_match(line, "windowed"))
-        {
-            if (ini_val(line, v, sizeof(v)))
-                app->windowed = atoi(v);
-        }
     }
     fclose(f);
 }
@@ -130,7 +125,6 @@ void ini_save(App *app)
     fprintf(f, "rom = %s\n", app->fields[FIELD_ROM].buf);
     fprintf(f, "peer_ip = %s\n", app->fields[FIELD_IP].buf);
     fprintf(f, "player = %d\n", app->player);
-    fprintf(f, "windowed = %d\n", app->windowed);
     fclose(f);
 }
 

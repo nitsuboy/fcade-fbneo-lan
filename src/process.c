@@ -1,7 +1,7 @@
 #include "process.h"
 #include "config.h"
 
-void build_cmd(App *app, int side, int wink, char *out, int out_sz)
+void build_cmd(App *app, int side, char *out, int out_sz)
 {
     const char *rom = app->fields[FIELD_ROM].buf;
     const char *ip = app->fields[FIELD_IP].buf;
@@ -16,16 +16,15 @@ void build_cmd(App *app, int side, int wink, char *out, int out_sz)
         pport = "7000";
     }
 
-    const char *win = wink ? "-w" : "";
     char ep[512];
     emu_path(app, ep, sizeof(ep));
 #ifdef _WIN32
-    snprintf(out, out_sz, "\"%s\" quark:direct,%s,%s,%s,%s,%d,0 %s",
-             ep, rom, port, ip, pport, side, win);
+    snprintf(out, out_sz, "\"%s\" quark:direct,%s,%s,%s,%s,%d,0 -w",
+             ep, rom, port, ip, pport, side);
     TraceLog(LOG_INFO,out);
 #else
-    snprintf(out, out_sz, "%s \"%s\" quark:direct,%s,%s,%s,%s,%d,0 %s",
-             LAUNCHER, ep, rom, port, ip, pport, side, win);
+    snprintf(out, out_sz, "%s \"%s\" quark:direct,%s,%s,%s,%s,%d,0 -w",
+             LAUNCHER, ep, rom, port, ip, pport, side);
 #endif
 }
 
@@ -33,7 +32,7 @@ void launch_emulator(App *app)
 {
     char cmd[1024];
     int side = app->player;
-    build_cmd(app, side, app->windowed, cmd, sizeof(cmd));
+    build_cmd(app, side, cmd, sizeof(cmd));
 
     app->output_len = snprintf(app->output, MAX_OUTPUT, "$ %s\n", cmd);
     app->launch_handle = INVALID_PROC;
