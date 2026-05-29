@@ -58,6 +58,7 @@ static void field_init(
 
 int main(void)
 {
+    setlocale(LC_ALL,"");
     App app = {0};
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
