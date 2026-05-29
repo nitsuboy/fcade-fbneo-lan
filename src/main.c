@@ -77,8 +77,6 @@ int main(void)
                0, 3, 1);
     field_init(&app.fields[FIELD_PLAYER], FIELD_PLAYER, "Player", "",
                0, 4, 2);
-    field_init(&app.fields[FIELD_WINDOWED], FIELD_WINDOWED, "Window", "",
-               0, 5, 2);
 
     app.editing_field = -1;
     app.selected_rom = -1;
@@ -136,9 +134,6 @@ int main(void)
             {
             case FIELD_PLAYER:
                 GuiToggleGroup(app.fields[i].rect, "P1;P2", &app.player);
-                break;
-            case FIELD_WINDOWED:
-                GuiToggleGroup(app.fields[i].rect, "Fullscreen;Windowed", &app.windowed);
                 break;
             case FIELD_ROM:
                 break;
